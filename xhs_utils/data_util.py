@@ -92,9 +92,55 @@ def handle_note_info(data):
         except:
             pass
     if note_type == '视频':
-        video_cover = image_list[0]
-        video_addr = 'https://sns-video-bd.xhscdn.com/' + data['note_card']['video']['consumer']['origin_video_key']
-        # success, msg, video_addr = XHS_Apis.get_note_no_water_video(note_id)
+        video_cover = image_list[0] if image_list else None
+        
+        # 方法1：从API数据中获取视频地址
+        try:
+            # 打印完整的video数据结构用于调试
+            video_data = data['note_card'].get('video', {}).get('media', {})
+            logger.info(f"视频数据结构: {json.dumps(video_data, ensure_ascii=False, indent=2)}")
+            
+            # 从stream中提取视频URL
+            stream = video_data.get('stream', {})
+            video_addr = None
+            
+            # 按优先级尝试不同编码格式
+            # 1. 优先h264
+            if 'h264' in stream and len(stream['h264']) > 0:
+                video_addr = stream['h264'][0].get('master_url')
+                if video_addr:
+                    logger.info(f"方法1成功获取视频地址(h264): {video_addr}")
+            
+            # 2. 如果h264没有，尝试h265
+            if not video_addr and 'h265' in stream and len(stream['h265']) > 0:
+                video_addr = stream['h265'][0].get('master_url')
+                if video_addr:
+                    logger.info(f"方法1成功获取视频地址(h265): {video_addr}")
+            
+            # 3. 如果还没有，尝试av1
+            if not video_addr and 'av1' in stream and len(stream['av1']) > 0:
+                video_addr = stream['av1'][0].get('master_url')
+                if video_addr:
+                    logger.info(f"方法1成功获取视频地址(av1): {video_addr}")
+            
+            # 4. 如果所有格式都失败，抛出异常进入方法2
+            if not video_addr:
+                raise KeyError("stream中未找到可用的视频URL")
+                
+        except (KeyError, TypeError, IndexError) as e:
+            # 方法2：使用备用方法获取视频地址
+            logger.warning(f"方法1获取视频地址失败 ({e})，尝试备用方法2")
+            try:
+                from apis.xhs_pc_apis import XHS_Apis
+                success, msg, video_addr = XHS_Apis.get_note_no_water_video(note_id)
+                if not success or not video_addr:
+                    logger.error(f"方法2也失败: {msg}")
+                    video_addr = None
+                else:
+                    logger.info(f"方法2成功获取视频地址")
+            except Exception as e2:
+                logger.error(f"方法2执行异常: {e2}")
+                video_addr = None
     else:
         video_cover = None
         video_addr = None
