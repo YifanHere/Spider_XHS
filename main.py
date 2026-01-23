@@ -137,9 +137,9 @@ if __name__ == '__main__':
     # data_spider.spider_user_all_note(user_url, cookies_str, base_path, 'all')
 
     # 3 搜索指定关键词的笔记
-    query = "赣南脐橙"
-    query_num = 30
-    sort_type_choice = 0  # 0 综合排序, 1 最新, 2 最多点赞, 3 最多评论, 4 最多收藏
+    query = "新会陈皮"
+    query_num = 300
+    sort_type_choice = 3  # 0 综合排序, 1 最新, 2 最多点赞, 3 最多评论, 4 最多收藏
     note_type = 1 # 0 不限, 1 视频笔记, 2 普通笔记
     note_time = 0  # 0 不限, 1 一天内, 2 一周内天, 3 半年内
     note_range = 0  # 0 不限, 1 已看过, 2 未看过, 3 已关注
