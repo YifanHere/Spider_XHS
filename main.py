@@ -21,7 +21,7 @@ class Data_Spider:
         note_info: dict | None = None
         try:
             success, msg, note_info = self.xhs_apis.get_note_info(note_url, cookies_str, proxies)
-            if success:
+            if success and note_info is not None:
                 note_info = note_info['data']['items'][0]
                 note_info['url'] = note_url
                 note_info = handle_note_info(note_info)
@@ -122,6 +122,10 @@ if __name__ == '__main__':
     cookies_str: str
     base_path: dict[str, str]
     cookies_str, base_path = init()
+    if cookies_str is None:
+        raise ValueError("COOKIES not found in .env file")
+    if base_path is None:
+        raise ValueError("Failed to initialize base paths")
     data_spider = Data_Spider()
     """
         save_choice: all: 保存所有的信息, media: 保存视频和图片（media-video只下载视频, media-image只下载图片，media都下载）, excel: 保存到excel
