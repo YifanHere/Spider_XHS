@@ -38,7 +38,7 @@ class Data_Spider():
         :param base_path:
         :return:
         """
-        if (save_choice == 'all' or save_choice == 'excel') and excel_name == '':
+        if save_choice in ('all', 'excel') and excel_name == '':
             raise ValueError('excel_name 不能为空')
         note_list = []
         for note_url in notes:
@@ -46,9 +46,9 @@ class Data_Spider():
             if note_info is not None and success:
                 note_list.append(note_info)
         for note_info in note_list:
-            if save_choice == 'all' or save_choice == 'media' or save_choice == 'media-video' or save_choice == 'media-image':
+            if save_choice in ('all', 'media', 'media-video', 'media-image'):
                 download_note(note_info, base_path['media'], save_choice)
-        if save_choice == 'all' or save_choice == 'excel':
+        if save_choice in ('all', 'excel'):
             file_path = os.path.abspath(os.path.join(base_path['excel'], f'{excel_name}.xlsx'))
             save_to_xlsx(note_list, file_path)
 
@@ -69,7 +69,7 @@ class Data_Spider():
                 for simple_note_info in all_note_info:
                     note_url = f"https://www.xiaohongshu.com/explore/{simple_note_info['note_id']}?xsec_token={simple_note_info['xsec_token']}"
                     note_list.append(note_url)
-            if save_choice == 'all' or save_choice == 'excel':
+            if save_choice in ('all', 'excel'):
                 excel_name = user_url.split('/')[-1].split('?')[0]
             self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies)
         except Exception as e:
@@ -101,7 +101,7 @@ class Data_Spider():
                 for note in notes:
                     note_url = f"https://www.xiaohongshu.com/explore/{note['id']}?xsec_token={note['xsec_token']}"
                     note_list.append(note_url)
-            if save_choice == 'all' or save_choice == 'excel':
+            if save_choice in ('all', 'excel'):
                 excel_name = query
             self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies)
         except Exception as e:
