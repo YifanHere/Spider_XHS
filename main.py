@@ -1,23 +1,24 @@
 import json
 import os
+from typing import Any
 from loguru import logger
 from apis.xhs_pc_apis import XHS_Apis
 from xhs_utils.common_util import init
 from xhs_utils.data_util import handle_note_info, download_note, save_to_xlsx
 
 
-class Data_Spider():
-    def __init__(self):
-        self.xhs_apis = XHS_Apis()
+class Data_Spider:
+    def __init__(self) -> None:
+        self.xhs_apis: XHS_Apis = XHS_Apis()
 
-    def spider_note(self, note_url: str, cookies_str: str, proxies=None):
+    def spider_note(self, note_url: str, cookies_str: str, proxies: dict | None = None) -> tuple[bool, str, dict | None]:
         """
         爬取一个笔记的信息
         :param note_url:
         :param cookies_str:
         :return:
         """
-        note_info = None
+        note_info: dict | None = None
         try:
             success, msg, note_info = self.xhs_apis.get_note_info(note_url, cookies_str, proxies)
             if success:
@@ -30,7 +31,7 @@ class Data_Spider():
         logger.info(f'爬取笔记信息 {note_url}: {success}, msg: {msg}')
         return success, msg, note_info
 
-    def spider_some_note(self, notes: list, cookies_str: str, base_path: dict, save_choice: str, excel_name: str = '', proxies=None):
+    def spider_some_note(self, notes: list[str], cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None) -> None:
         """
         爬取一些笔记的信息
         :param notes:
@@ -53,7 +54,7 @@ class Data_Spider():
             save_to_xlsx(note_list, file_path)
 
 
-    def spider_user_all_note(self, user_url: str, cookies_str: str, base_path: dict, save_choice: str, excel_name: str = '', proxies=None):
+    def spider_user_all_note(self, user_url: str, cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None) -> tuple[list[str], bool, str]:
         """
         爬取一个用户的所有笔记
         :param user_url:
@@ -78,7 +79,7 @@ class Data_Spider():
         logger.info(f'爬取用户所有视频 {user_url}: {success}, msg: {msg}')
         return note_list, success, msg
 
-    def spider_some_search_note(self, query: str, require_num: int, cookies_str: str, base_path: dict, save_choice: str, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo: dict = None,  excel_name: str = '', proxies=None):
+    def spider_some_search_note(self, query: str, require_num: int, cookies_str: str, base_path: dict[str, str], save_choice: str, sort_type_choice: int = 0, note_type: int = 0, note_time: int = 0, note_range: int = 0, pos_distance: int = 0, geo: dict[str, Any] | None = None, excel_name: str = '', proxies: dict | None = None) -> tuple[list[str], bool, str]:
         """
             指定数量搜索笔记，设置排序方式和笔记类型和笔记数量
             :param query 搜索的关键词
@@ -118,6 +119,8 @@ if __name__ == '__main__':
         感谢star和follow
     """
 
+    cookies_str: str
+    base_path: dict[str, str]
     cookies_str, base_path = init()
     data_spider = Data_Spider()
     """
