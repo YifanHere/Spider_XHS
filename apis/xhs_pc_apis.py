@@ -2,6 +2,7 @@
 import json
 import re
 import urllib
+from typing import Any
 import requests
 from xhs_utils.xhs_util import splice_str, generate_request_params, generate_x_b3_traceid, get_common_headers
 from loguru import logger
@@ -412,7 +413,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def search_note(self, query: str, cookies_str: str, page=1, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict | None = None):
+    def search_note(self, query: str, cookies_str: str, page=1, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo: dict[str, Any] | None = None, proxies: dict | None = None):
         """
             获取搜索笔记的结果
             :param query 搜索的关键词
@@ -459,8 +460,10 @@ class XHS_Apis():
             filter_pos_distance = "同城"
         elif pos_distance == 2:
             filter_pos_distance = "附近"
-        if geo:
-            geo = json.dumps(geo, separators=(',', ':'))
+        if geo is not None:
+            geo_str = json.dumps(geo, separators=(',', ':'))
+        else:
+            geo_str = ""
         try:
             api = "/api/sns/web/v1/search/notes"
             data = {
@@ -503,7 +506,7 @@ class XHS_Apis():
                         "type": "filter_pos_distance"
                     }
                 ],
-                "geo": geo,
+                "geo": geo_str,
                 "image_formats": [
                     "jpg",
                     "webp",
@@ -519,7 +522,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def search_some_note(self, query: str, require_num: int, cookies_str: str, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict | None = None):
+    def search_some_note(self, query: str, require_num: int, cookies_str: str, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo: dict[str, Any] | None = None, proxies: dict | None = None):
         """
             指定数量搜索笔记，设置排序方式和笔记类型和笔记数量
             :param query 搜索的关键词
