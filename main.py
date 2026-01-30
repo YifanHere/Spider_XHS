@@ -46,7 +46,7 @@ class Data_Spider():
             if note_info is not None and success:
                 note_list.append(note_info)
         for note_info in note_list:
-            if save_choice == 'all' or 'media' in save_choice:
+            if save_choice == 'all' or save_choice == 'media' or save_choice == 'media-video' or save_choice == 'media-image':
                 download_note(note_info, base_path['media'], save_choice)
         if save_choice == 'all' or save_choice == 'excel':
             file_path = os.path.abspath(os.path.join(base_path['excel'], f'{excel_name}.xlsx'))
