@@ -14,7 +14,7 @@ class XHS_Apis():
     def __init__(self):
         self.base_url = "https://edith.xiaohongshu.com"
 
-    def get_homefeed_all_channel(self, cookies_str: str, proxies: dict = None):
+    def get_homefeed_all_channel(self, cookies_str: str, proxies: dict | None = None):
         """
             获取主页的所有频道
             返回主页的所有频道
@@ -31,7 +31,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_homefeed_recommend(self, category, cursor_score, refresh_type, note_index, cookies_str: str, proxies: dict = None):
+    def get_homefeed_recommend(self, category, cursor_score, refresh_type, note_index, cookies_str: str, proxies: dict | None = None):
         """
             获取主页推荐的笔记
             :param category: 你想要获取的频道
@@ -71,7 +71,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_homefeed_recommend_by_num(self, category, require_num, cookies_str: str, proxies: dict = None):
+    def get_homefeed_recommend_by_num(self, category, require_num, cookies_str: str, proxies: dict | None = None):
         """
             根据数量获取主页推荐的笔记
             :param category: 你想要获取的频道
@@ -102,7 +102,7 @@ class XHS_Apis():
             note_list = note_list[:require_num]
         return success, msg, note_list
 
-    def get_user_info(self, user_id: str, cookies_str: str, proxies: dict = None):
+    def get_user_info(self, user_id: str, cookies_str: str, proxies: dict | None = None):
         """
             获取用户的信息
             :param user_id: 你想要获取的用户的id
@@ -125,7 +125,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_user_self_info(self, cookies_str: str, proxies: dict = None):
+    def get_user_self_info(self, cookies_str: str, proxies: dict | None = None):
         """
             获取用户自己的信息1
             :param cookies_str: 你的cookies
@@ -144,7 +144,7 @@ class XHS_Apis():
         return success, msg, res_json
 
 
-    def get_user_self_info2(self, cookies_str: str, proxies: dict = None):
+    def get_user_self_info2(self, cookies_str: str, proxies: dict | None = None):
         """
             获取用户自己的信息2
             :param cookies_str: 你的cookies
@@ -162,7 +162,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_user_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict = None):
+    def get_user_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict | None = None):
         """
             获取用户指定位置的笔记
             :param user_id: 你想要获取的用户的id
@@ -192,7 +192,7 @@ class XHS_Apis():
         return success, msg, res_json
 
 
-    def get_user_all_notes(self, user_url: str, cookies_str: str, proxies: dict = None):
+    def get_user_all_notes(self, user_url: str, cookies_str: str, proxies: dict | None = None):
         """
            获取用户所有笔记
            :param user_id: 你想要获取的用户的id
@@ -225,7 +225,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, note_list
 
-    def get_user_like_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict = None):
+    def get_user_like_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict | None = None):
         """
             获取用户指定位置喜欢的笔记
             :param user_id: 你想要获取的用户的id
@@ -254,7 +254,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_user_all_like_note_info(self, user_url: str, cookies_str: str, proxies: dict = None):
+    def get_user_all_like_note_info(self, user_url: str, cookies_str: str, proxies: dict | None = None):
         """
             获取用户所有喜欢笔记
             :param user_id: 你想要获取的用户的id
@@ -288,7 +288,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, note_list
 
-    def get_user_collect_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict = None):
+    def get_user_collect_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict | None = None):
         """
             获取用户指定位置收藏的笔记
             :param user_id: 你想要获取的用户的id
@@ -317,7 +317,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_user_all_collect_note_info(self, user_url: str, cookies_str: str, proxies: dict = None):
+    def get_user_all_collect_note_info(self, user_url: str, cookies_str: str, proxies: dict | None = None):
         """
             获取用户所有收藏笔记
             :param user_id: 你想要获取的用户的id
@@ -351,7 +351,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, note_list
 
-    def get_note_info(self, url: str, cookies_str: str, proxies: dict = None):
+    def get_note_info(self, url: str, cookies_str: str, proxies: dict | None = None):
         """
             获取笔记的详细
             :param url: 你想要获取的笔记的url
@@ -389,7 +389,7 @@ class XHS_Apis():
         return success, msg, res_json
 
 
-    def get_search_keyword(self, word: str, cookies_str: str, proxies: dict = None):
+    def get_search_keyword(self, word: str, cookies_str: str, proxies: dict | None = None):
         """
             获取搜索关键词
             :param word: 你的关键词
@@ -412,7 +412,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def search_note(self, query: str, cookies_str: str, page=1, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict = None):
+    def search_note(self, query: str, cookies_str: str, page=1, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict | None = None):
         """
             获取搜索笔记的结果
             :param query 搜索的关键词
@@ -519,7 +519,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def search_some_note(self, query: str, require_num: int, cookies_str: str, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict = None):
+    def search_some_note(self, query: str, require_num: int, cookies_str: str, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo="", proxies: dict | None = None):
         """
             指定数量搜索笔记，设置排序方式和笔记类型和笔记数量
             :param query 搜索的关键词
@@ -554,7 +554,7 @@ class XHS_Apis():
             note_list = note_list[:require_num]
         return success, msg, note_list
 
-    def search_user(self, query: str, cookies_str: str, page=1, proxies: dict = None):
+    def search_user(self, query: str, cookies_str: str, page=1, proxies: dict | None = None):
         """
             获取搜索用户的结果
             :param query 搜索的关键词
@@ -584,7 +584,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def search_some_user(self, query: str, require_num: int, cookies_str: str, proxies: dict = None):
+    def search_some_user(self, query: str, require_num: int, cookies_str: str, proxies: dict | None = None):
         """
             指定数量搜索用户
             :param query 搜索的关键词
@@ -613,7 +613,7 @@ class XHS_Apis():
             user_list = user_list[:require_num]
         return success, msg, user_list
 
-    def get_note_out_comment(self, note_id: str, cursor: str, xsec_token: str, cookies_str: str, proxies: dict = None):
+    def get_note_out_comment(self, note_id: str, cursor: str, xsec_token: str, cookies_str: str, proxies: dict | None = None):
         """
             获取指定位置的笔记一级评论
             :param note_id 笔记的id
@@ -641,7 +641,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_note_all_out_comment(self, note_id: str, xsec_token: str, cookies_str: str, proxies: dict = None):
+    def get_note_all_out_comment(self, note_id: str, xsec_token: str, cookies_str: str, proxies: dict | None = None):
         """
             获取笔记的全部一级评论
             :param note_id 笔记的id
@@ -668,7 +668,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, note_out_comment_list
 
-    def get_note_inner_comment(self, comment: dict, cursor: str, xsec_token: str, cookies_str: str, proxies: dict = None):
+    def get_note_inner_comment(self, comment: dict, cursor: str, xsec_token: str, cookies_str: str, proxies: dict | None = None):
         """
             获取指定位置的笔记二级评论
             :param comment 笔记的一级评论
@@ -698,7 +698,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_note_all_inner_comment(self, comment: dict, xsec_token: str, cookies_str: str, proxies: dict = None):
+    def get_note_all_inner_comment(self, comment: dict, xsec_token: str, cookies_str: str, proxies: dict | None = None):
         """
             获取笔记的全部二级评论
             :param comment 笔记的一级评论
@@ -728,7 +728,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, comment
 
-    def get_note_all_comment(self, url: str, cookies_str: str, proxies: dict = None):
+    def get_note_all_comment(self, url: str, cookies_str: str, proxies: dict | None = None):
         """
             获取一篇文章的所有评论
             :param note_id: 你想要获取的笔记的id
@@ -753,7 +753,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, out_comment_list
 
-    def get_unread_message(self, cookies_str: str, proxies: dict = None):
+    def get_unread_message(self, cookies_str: str, proxies: dict | None = None):
         """
             获取未读消息
             :param cookies_str: 你的cookies
@@ -771,7 +771,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_metions(self, cursor: str, cookies_str: str, proxies: dict = None):
+    def get_metions(self, cursor: str, cookies_str: str, proxies: dict | None = None):
         """
             获取评论和@提醒
             :param cursor: 你想要获取的评论和@提醒的cursor
@@ -795,7 +795,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_all_metions(self, cookies_str: str, proxies: dict = None):
+    def get_all_metions(self, cookies_str: str, proxies: dict | None = None):
         """
             获取全部的评论和@提醒
             :param cookies_str: 你的cookies
@@ -821,7 +821,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, metions_list
 
-    def get_likesAndcollects(self, cursor: str, cookies_str: str, proxies: dict = None):
+    def get_likesAndcollects(self, cursor: str, cookies_str: str, proxies: dict | None = None):
         """
             获取赞和收藏
             :param cursor: 你想要获取的赞和收藏的cursor
@@ -845,7 +845,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_all_likesAndcollects(self, cookies_str: str, proxies: dict = None):
+    def get_all_likesAndcollects(self, cookies_str: str, proxies: dict | None = None):
         """
             获取全部的赞和收藏
             :param cookies_str: 你的cookies
@@ -871,7 +871,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, likesAndcollects_list
 
-    def get_new_connections(self, cursor: str, cookies_str: str, proxies: dict = None):
+    def get_new_connections(self, cursor: str, cookies_str: str, proxies: dict | None = None):
         """
             获取新增关注
             :param cursor: 你想要获取的新增关注的cursor
@@ -895,7 +895,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
-    def get_all_new_connections(self, cookies_str: str, proxies: dict = None):
+    def get_all_new_connections(self, cookies_str: str, proxies: dict | None = None):
         """
             获取全部的新增关注
             :param cookies_str: 你的cookies
