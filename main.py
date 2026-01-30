@@ -22,9 +22,9 @@ class Data_Spider:
         try:
             success, msg, note_info = self.xhs_apis.get_note_info(note_url, cookies_str, proxies)
             if success and note_info is not None:
-                note_info = note_info['data']['items'][0]
-                note_info['url'] = note_url
-                note_info = handle_note_info(note_info)
+                note_data = note_info['data']['items'][0]
+                note_data['url'] = note_url
+                note_info = handle_note_info(note_data)
         except Exception as e:
             success = False
             msg = str(e)
@@ -119,9 +119,9 @@ if __name__ == '__main__':
         感谢star和follow
     """
 
-    cookies_str: str
-    base_path: dict[str, str]
-    cookies_str, base_path = init()
+    cookies_str_result, base_path_result = init()
+    cookies_str: str = cookies_str_result if cookies_str_result is not None else ""
+    base_path: dict[str, str] = base_path_result if base_path_result is not None else {}
     if cookies_str is None:
         raise ValueError("COOKIES not found in .env file")
     if base_path is None:
