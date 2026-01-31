@@ -125,7 +125,6 @@ if __name__ == '__main__':
         此文件为爬虫的入口文件，可以直接运行
         apis/xhs_pc_apis.py 为爬虫的api文件，包含小红书的全部数据接口，可以继续封装
         apis/xhs_creator_apis.py 为小红书创作者中心的api文件
-        感谢star和follow
     """
 
     cookies_str_result, base_path_result = init()
