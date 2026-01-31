@@ -1,5 +1,7 @@
 import json
 import os
+import random
+import time
 from typing import Any
 from loguru import logger
 from apis.xhs_pc_apis import XHS_Apis
@@ -85,10 +87,18 @@ class Data_Spider:
         if save_choice in ('all', 'excel') and excel_name == '':
             raise ValueError('excel_name 不能为空')
         note_list = []
-        for note_url in notes:
+        for idx, note_url in enumerate(notes):
             success, msg, note_info = self.spider_note(note_url, cookies_str, proxies)
+            if not success:
+                if '300013' in msg or '访问频繁' in msg:
+                    logger.error(f"触发小红书风控(300013)，建议：1. 等待 10-30 分钟后重试 2. 使用代理 3. 降低请求频率")
             if note_info is not None and success:
                 note_list.append(note_info)
+            # Add delay between notes (not after last one)
+            if idx < len(notes) - 1:
+                delay = random.uniform(2.0, 5.0)
+                logger.debug(f"笔记处理间隔延迟: {delay:.1f} 秒")
+                time.sleep(delay)
         for note_info in note_list:
             if save_choice in ('all', 'media', 'media-video', 'media-image'):
                 download_note(note_info, base_path['media'], save_choice, keyword=keyword)
@@ -160,6 +170,9 @@ class Data_Spider:
         except Exception as e:
             success = False
             msg = str(e)
+        if not success:
+            if '300013' in msg or '访问频繁' in msg:
+                logger.error(f"触发小红书风控(300013)，建议：1. 等待 10-30 分钟后重试 2. 使用代理 3. 降低请求频率")
         logger.info(f'搜索关键词 {query} 笔记: {success}, msg: {msg}')
         return note_list, success, msg
 
@@ -220,6 +233,11 @@ if __name__ == '__main__':
             )
             success_count += 1
             logger.info(f'✓ Completed: {query}')
+            # Add delay between keywords (not after last one)
+            if idx < len(keywords):
+                delay = random.uniform(5.0, 10.0)
+                logger.info(f"关键词处理完成，冷却 {delay:.1f} 秒...")
+                time.sleep(delay)
         except Exception as e:
             logger.error(f'✗ Failed: {query} - {str(e)}')
             failed_keywords.append((query, str(e)))
