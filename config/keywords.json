@@ -1,7 +1,7 @@
 {
   "keywords": ["富平柿饼", "郫县豆瓣"],
   "global_params": {
-    "require_num": 5,
+    "require_num": 300,
     "sort_type_choice": 0,
     "note_type": 0,
     "note_time": 0,
