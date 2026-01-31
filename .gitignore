@@ -35,8 +35,13 @@ datas/
 .env
 .sisyphus/
 <<<<<<< HEAD
+<<<<<<< HEAD
 /config/keywords.json
 =======
 
 config/keywords.json
 >>>>>>> 2d5e7c3 (gitignore忽略config文件夹下的keywords.json)
+=======
+
+config/keywords.json
+>>>>>>> b292ae3 (gitignore忽略config文件夹下的keywords.json)
