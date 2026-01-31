@@ -1,3 +1,4 @@
+import json
 import os
 from loguru import logger
 from dotenv import load_dotenv
@@ -20,3 +21,14 @@ def init():
         'excel': excel_base_path,
     }
     return cookies_str, base_path
+
+def load_keywords_config(config_path: str = "config/keywords.json") -> dict:
+    """
+    加载关键词配置文件
+
+    :param config_path: 配置文件路径
+    :return: 包含keywords和global_params的字典
+    :raises: FileNotFoundError, json.JSONDecodeError
+    """
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
