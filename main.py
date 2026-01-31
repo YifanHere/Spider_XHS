@@ -14,20 +14,63 @@ class Data_Spider:
     def spider_note(self, note_url: str, cookies_str: str, proxies: dict | None = None) -> tuple[bool, str, dict | None]:
         """
         爬取一个笔记的信息
-        :param note_url:
-        :param cookies_str:
-        :return:
+        :param note_url: 笔记 URL
+        :param cookies_str: cookies 字符串
+        :param proxies: 代理配置
+        :return: (success, msg, note_info)
         """
         note_info: dict | None = None
         try:
             success, msg, note_info = self.xhs_apis.get_note_info(note_url, cookies_str, proxies)
-            if success and note_info is not None:
-                note_data = note_info['data']['items'][0]
-                note_data['url'] = note_url
-                note_info = handle_note_info(note_data)
+
+            # 防御性检查：API 调用是否成功
+            if not success:
+                return False, f"API调用失败: {msg}", None
+
+            # 防御性检查：响应是否为 None
+            if note_info is None:
+                return False, "API返回空响应", None
+
+            # 防御性检查：响应是否为字典
+            if not isinstance(note_info, dict):
+                return False, f"API返回非预期类型: {type(note_info)}", None
+
+            # 防御性检查：是否存在 data 字段
+            if 'data' not in note_info:
+                logger.debug(f"API响应缺少'data'字段。可用键: {list(note_info.keys())}")
+                return False, "API响应缺少'data'字段", None
+
+            data = note_info['data']
+
+            # 防御性检查：data 是否为 None
+            if data is None:
+                return False, "API返回data=None", None
+
+            # 防御性检查：是否存在 items 字段
+            if 'items' not in data:
+                logger.debug(f"API data缺少'items'字段。可用键: {list(data.keys())}")
+                return False, "API响应缺少'items'字段（笔记可能已删除或不可访问）", None
+
+            items = data['items']
+
+            # 防御性检查：items 是否为非空列表
+            if not isinstance(items, list) or len(items) == 0:
+                return False, "API返回空的items列表", None
+
+            # 现在可以安全访问 items[0]
+            note_data = items[0]
+            note_data['url'] = note_url
+            note_info = handle_note_info(note_data)
+
+        except KeyError as e:
+            success = False
+            msg = f"API响应缺少必要字段: {e}"
+            logger.warning(f"{msg}。note_info类型: {type(note_info)}")
         except Exception as e:
             success = False
-            msg = str(e)
+            msg = f"未预期的错误: {type(e).__name__}: {e}"
+            logger.error(msg)
+
         logger.info(f'爬取笔记信息 {note_url}: {success}, msg: {msg}')
         return success, msg, note_info
 
