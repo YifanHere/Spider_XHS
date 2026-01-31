@@ -34,4 +34,4 @@ datas/
 
 .env
 .sisyphus/
-config/
+/config/keywords.json
