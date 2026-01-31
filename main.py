@@ -31,7 +31,7 @@ class Data_Spider:
         logger.info(f'爬取笔记信息 {note_url}: {success}, msg: {msg}')
         return success, msg, note_info
 
-    def spider_some_note(self, notes: list[str], cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None) -> None:
+    def spider_some_note(self, notes: list[str], cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None, keyword: str | None = None) -> None:
         """
         爬取一些笔记的信息
         :param notes:
@@ -48,7 +48,7 @@ class Data_Spider:
                 note_list.append(note_info)
         for note_info in note_list:
             if save_choice in ('all', 'media', 'media-video', 'media-image'):
-                download_note(note_info, base_path['media'], save_choice)
+                download_note(note_info, base_path['media'], save_choice, keyword=keyword)
         if save_choice in ('all', 'excel'):
             file_path = os.path.abspath(os.path.join(base_path['excel'], f'{excel_name}.xlsx'))
             save_to_xlsx(note_list, file_path)
@@ -113,7 +113,7 @@ class Data_Spider:
                     excel_name = f"{original_name}_{counter}"
                     excel_path = os.path.join(base_path['excel'], f"{excel_name}.xlsx")
                     counter += 1
-            self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies)
+            self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies, keyword=query)
         except Exception as e:
             success = False
             msg = str(e)
