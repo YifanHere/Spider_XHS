@@ -293,7 +293,7 @@ def save_note_detail(note, path):
 
 
 @retry(tries=3, delay=1)
-def download_note(note_info, path, save_choice):
+def download_note(note_info, path, save_choice, keyword=None):
     note_id = note_info['note_id']
     user_id = note_info['user_id']
     title = note_info['title']
@@ -302,7 +302,12 @@ def download_note(note_info, path, save_choice):
     nickname = norm_str(nickname)[:20]
     if title.strip() == '':
         title = f'无标题'
-    save_path = f'{path}/{nickname}_{user_id}/{title}_{note_id}'
+    # 如果提供了关键词，添加关键词层级
+    if keyword:
+        keyword_safe = norm_str(keyword)[:50]
+        save_path = f'{path}/{keyword_safe}/{nickname}_{user_id}/{title}_{note_id}'
+    else:
+        save_path = f'{path}/{nickname}_{user_id}/{title}_{note_id}'
     check_and_create_path(save_path)
     with open(f'{save_path}/info.json', mode='w', encoding='utf-8') as f:
         f.write(json.dumps(note_info) + '\n')
