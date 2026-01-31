@@ -1,11 +1,64 @@
 # encoding: utf-8
+import functools
 import json
+import random
 import re
+import time
 import urllib
 from typing import Any
 import requests
 from xhs_utils.xhs_util import splice_str, generate_request_params, generate_x_b3_traceid, get_common_headers
 from loguru import logger
+
+
+def add_request_delay(min_seconds=1.0, max_seconds=3.0):
+    """添加随机请求延迟，模拟人类行为"""
+    delay = random.uniform(min_seconds, max_seconds)
+    time.sleep(delay)
+
+
+def retry_with_backoff(max_tries=3, initial_delay=5.0):
+    """
+    智能重试装饰器，处理小红书风控错误码 300013
+    实现指数退避策略 (5s -> 10s -> 20s)
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            delay = initial_delay
+            last_exception = None
+            
+            for attempt in range(max_tries):
+                try:
+                    result = func(*args, **kwargs)
+                    # 检查结果是否包含风控错误
+                    if isinstance(result, tuple) and len(result) >= 3:
+                        success, msg, data = result[0], result[1], result[2]
+                        if not success and isinstance(msg, str):
+                            # 检测风控错误码
+                            if '300013' in msg or '访问频繁' in msg:
+                                logger.warning(f"触发风控(300013)，第 {attempt + 1}/{max_tries} 次重试，等待 {delay:.1f} 秒...")
+                                time.sleep(delay)
+                                delay *= 2  # 指数退避
+                                last_exception = Exception(msg)
+                                continue
+                    return result
+                except Exception as e:
+                    error_msg = str(e)
+                    if '300013' in error_msg or '访问频繁' in error_msg:
+                        if attempt < max_tries - 1:
+                            logger.warning(f"触发风控(300013)，第 {attempt + 1}/{max_tries} 次重试，等待 {delay:.1f} 秒...")
+                            time.sleep(delay)
+                            delay *= 2
+                            last_exception = e
+                        else:
+                            raise
+                    else:
+                        raise
+            
+            raise last_exception if last_exception else Exception("Max retries exceeded")
+        return wrapper
+    return decorator
 
 """
     获小红书的api
@@ -163,6 +216,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
+    @retry_with_backoff(max_tries=3, initial_delay=5.0)
     def get_user_note_info(self, user_id: str, cursor: str, cookies_str: str, xsec_token='', xsec_source='', proxies: dict | None = None):
         """
             获取用户指定位置的笔记
@@ -173,6 +227,8 @@ class XHS_Apis():
         """
         res_json = None
         try:
+            # 添加请求延迟
+            add_request_delay(1.0, 3.0)
             api = f"/api/sns/web/v1/user_posted"
             params = {
                 "num": "30",
@@ -352,6 +408,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, note_list
 
+    @retry_with_backoff(max_tries=3, initial_delay=5.0)
     def get_note_info(self, url: str, cookies_str: str, proxies: dict | None = None):
         """
             获取笔记的详细
@@ -362,6 +419,8 @@ class XHS_Apis():
         """
         res_json = None
         try:
+            # 添加请求延迟
+            add_request_delay(1.0, 3.0)
             urlParse = urllib.parse.urlparse(url)
             note_id = urlParse.path.split("/")[-1]
             kvs = urlParse.query.split('&')
@@ -413,6 +472,7 @@ class XHS_Apis():
             msg = str(e)
         return success, msg, res_json
 
+    @retry_with_backoff(max_tries=3, initial_delay=5.0)
     def search_note(self, query: str, cookies_str: str, page=1, sort_type_choice=0, note_type=0, note_time=0, note_range=0, pos_distance=0, geo: dict[str, Any] | None = None, proxies: dict | None = None):
         """
             获取搜索笔记的结果
@@ -465,6 +525,8 @@ class XHS_Apis():
         else:
             geo_str = ""
         try:
+            # 添加请求延迟
+            add_request_delay(1.0, 3.0)
             api = "/api/sns/web/v1/search/notes"
             data = {
                 "keyword": query,
