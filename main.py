@@ -3,7 +3,7 @@ import os
 from typing import Any
 from loguru import logger
 from apis.xhs_pc_apis import XHS_Apis
-from xhs_utils.common_util import init
+from xhs_utils.common_util import init, load_keywords_config
 from xhs_utils.data_util import handle_note_info, download_note, save_to_xlsx
 
 
@@ -103,7 +103,16 @@ class Data_Spider:
                     note_url = f"https://www.xiaohongshu.com/explore/{note['id']}?xsec_token={note['xsec_token']}"
                     note_list.append(note_url)
             if save_choice in ('all', 'excel'):
-                excel_name = query
+                from xhs_utils.data_util import norm_str
+                excel_name = norm_str(query)
+                # Handle filename conflicts
+                excel_path = os.path.join(base_path['excel'], f"{excel_name}.xlsx")
+                counter = 1
+                original_name = excel_name
+                while os.path.exists(excel_path):
+                    excel_name = f"{original_name}_{counter}"
+                    excel_path = os.path.join(base_path['excel'], f"{excel_name}.xlsx")
+                    counter += 1
             self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies)
         except Exception as e:
             success = False
@@ -143,17 +152,40 @@ if __name__ == '__main__':
     # user_url = 'https://www.xiaohongshu.com/user/profile/64c3f392000000002b009e45?xsec_token=AB-GhAToFu07JwNk_AMICHnp7bSTjVz2beVIDBwSyPwvM=&xsec_source=pc_feed'
     # data_spider.spider_user_all_note(user_url, cookies_str, base_path, 'all')
 
-    # 3 搜索指定关键词的笔记
-    query = "金华火腿"
-    query_num = 300
-    sort_type_choice = 3  # 0 综合排序, 1 最新, 2 最多点赞, 3 最多评论, 4 最多收藏
-    note_type = 1 # 0 不限, 1 视频笔记, 2 普通笔记
-    note_time = 0  # 0 不限, 1 一天内, 2 一周内天, 3 半年内
-    note_range = 0  # 0 不限, 1 已看过, 2 未看过, 3 已关注
-    pos_distance = 0  # 0 不限, 1 同城, 2 附近 指定这个1或2必须要指定 geo
-    # geo = {
-    #     # 经纬度
-    #     "latitude": 39.9725,
-    #     "longitude": 116.4207
-    # }
-    data_spider.spider_some_search_note(query, query_num, cookies_str, base_path, 'all', sort_type_choice, note_type, note_time, note_range, pos_distance, geo=None)
+    # 3 搜索指定关键词的笔记（多关键词配置模式）
+    config = load_keywords_config()
+    keywords = config['keywords']
+    params = config['global_params']
+
+    success_count = 0
+    failed_keywords = []
+
+    for idx, query in enumerate(keywords, 1):
+        logger.info(f'[{idx}/{len(keywords)}] Processing keyword: {query}')
+        try:
+            data_spider.spider_some_search_note(
+                query,
+                params['require_num'],
+                cookies_str,
+                base_path,
+                params['save_choice'],
+                params['sort_type_choice'],
+                params['note_type'],
+                params['note_time'],
+                params['note_range'],
+                params['pos_distance'],
+                geo=None
+            )
+            success_count += 1
+            logger.info(f'✓ Completed: {query}')
+        except Exception as e:
+            logger.error(f'✗ Failed: {query} - {str(e)}')
+            failed_keywords.append((query, str(e)))
+
+    logger.info(f'\n{"="*50}')
+    logger.info(f'Crawl Summary:')
+    logger.info(f'Total: {len(keywords)} | Success: {success_count} | Failed: {len(failed_keywords)}')
+    if failed_keywords:
+        logger.info(f'Failed keywords:')
+        for kw, err in failed_keywords:
+            logger.info(f'  - {kw}: {err}')
