@@ -11,7 +11,7 @@ from xhs_utils.xhs_util import splice_str, generate_request_params, generate_x_b
 from loguru import logger
 
 
-def add_request_delay(min_seconds=1.0, max_seconds=3.0):
+def add_request_delay(min_seconds=3.0, max_seconds=6.0):
     """添加随机请求延迟，模拟人类行为"""
     delay = random.uniform(min_seconds, max_seconds)
     time.sleep(delay)
