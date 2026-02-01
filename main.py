@@ -96,7 +96,7 @@ class Data_Spider:
                 note_list.append(note_info)
             # Add delay between notes (not after last one)
             if idx < len(notes) - 1:
-                delay = random.uniform(2.0, 5.0)
+                delay = random.uniform(3.0, 6.0)
                 logger.debug(f"笔记处理间隔延迟: {delay:.1f} 秒")
                 time.sleep(delay)
         for note_info in note_list:
