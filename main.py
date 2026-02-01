@@ -7,6 +7,7 @@ from loguru import logger
 from apis.xhs_pc_apis import XHS_Apis
 from xhs_utils.common_util import init, load_keywords_config
 from xhs_utils.data_util import handle_note_info, download_note, save_to_xlsx
+from xhs_utils.path_util import is_note_downloaded, extract_note_id_from_url
 
 
 class Data_Spider:
@@ -76,18 +77,25 @@ class Data_Spider:
         logger.info(f'爬取笔记信息 {note_url}: {success}, msg: {msg}')
         return success, msg, note_info
 
-    def spider_some_note(self, notes: list[str], cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None, keyword: str | None = None) -> None:
+    def spider_some_note(self, notes: list[str], cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None, keyword: str | None = None, resume: bool = False) -> None:
         """
         爬取一些笔记的信息
-        :param notes:
-        :param cookies_str:
-        :param base_path:
+        :param notes: 笔记URL列表
+        :param cookies_str: cookies字符串
+        :param base_path: 保存路径字典
+        :param save_choice: 保存选项
+        :param excel_name: Excel文件名
+        :param proxies: 代理配置
+        :param keyword: 搜索关键词
+        :param resume: 是否启用断点续传，跳过已下载的笔记
         :return:
         """
         if save_choice in ('all', 'excel') and excel_name == '':
             raise ValueError('excel_name 不能为空')
         consecutive_success = 0
         note_list = []
+        skipped_count = 0
+        downloaded_count = 0
         for idx, note_url in enumerate(notes):
             success, msg, note_info = self.spider_note(note_url, cookies_str, proxies)
             if not success:
@@ -95,6 +103,21 @@ class Data_Spider:
                 if '300013' in msg or '访问频繁' in msg:
                     logger.error(f"触发小红书风控(300013)，建议：1. 等待 10-30 分钟后重试 2. 使用代理 3. 降低请求频率")
             if note_info is not None and success:
+                # 检查是否已下载（仅在resume=True时）
+                if resume:
+                    is_downloaded = is_note_downloaded(
+                        note_info['note_id'],
+                        note_info['title'],
+                        note_info['nickname'],
+                        note_info['user_id'],
+                        keyword,
+                        base_path['media']
+                    )
+                    if is_downloaded:
+                        logger.info(f"跳过已下载笔记: {note_info['note_id']} - {note_info['title'][:30]}...")
+                        skipped_count += 1
+                        note_list.append(note_info)  # 仍加入列表用于Excel
+                        continue
                 note_list.append(note_info)
                 consecutive_success += 1
             # Add delay between notes (not after last one)
@@ -108,6 +131,9 @@ class Data_Spider:
                     logger.info(f"连续获取10个笔记，冷却 {cooling_delay:.1f} 秒...")
                     time.sleep(cooling_delay)
                     consecutive_success = 0
+        # 输出跳过统计
+        if resume:
+            logger.info(f"断点续传统计: 跳过 {skipped_count} 个已下载笔记，处理 {len(note_list) - skipped_count} 个新笔记")
         for note_info in note_list:
             if save_choice in ('all', 'media', 'media-video', 'media-image'):
                 download_note(note_info, base_path['media'], save_choice, keyword=keyword)
@@ -141,7 +167,7 @@ class Data_Spider:
         logger.info(f'爬取用户所有视频 {user_url}: {success}, msg: {msg}')
         return note_list, success, msg
 
-    def spider_some_search_note(self, query: str, require_num: int, cookies_str: str, base_path: dict[str, str], save_choice: str, sort_type_choice: int = 0, note_type: int = 0, note_time: int = 0, note_range: int = 0, pos_distance: int = 0, geo: dict[str, Any] | None = None, excel_name: str = '', proxies: dict | None = None) -> tuple[list[str], bool, str]:
+    def spider_some_search_note(self, query: str, require_num: int, cookies_str: str, base_path: dict[str, str], save_choice: str, sort_type_choice: int = 0, note_type: int = 0, note_time: int = 0, note_range: int = 0, pos_distance: int = 0, geo: dict[str, Any] | None = None, excel_name: str = '', proxies: dict | None = None, resume: bool = False) -> tuple[list[str], bool, str]:
         """
             指定数量搜索笔记，设置排序方式和笔记类型和笔记数量
             :param query 搜索的关键词
@@ -175,7 +201,7 @@ class Data_Spider:
                     excel_name = f"{original_name}_{counter}"
                     excel_path = os.path.join(base_path['excel'], f"{excel_name}.xlsx")
                     counter += 1
-            self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies, keyword=query)
+            self.spider_some_note(note_list, cookies_str, base_path, save_choice, excel_name, proxies, keyword=query, resume=resume)
         except Exception as e:
             success = False
             msg = str(e)
@@ -191,6 +217,11 @@ if __name__ == '__main__':
         apis/xhs_pc_apis.py 为爬虫的api文件，包含小红书的全部数据接口，可以继续封装
         apis/xhs_creator_apis.py 为小红书创作者中心的api文件
     """
+    import argparse
+
+    parser = argparse.ArgumentParser(description='小红书爬虫')
+    parser.add_argument('--resume', action='store_true', help='启用断点续传，跳过已下载的笔记')
+    args = parser.parse_args()
 
     cookies_str_result, base_path_result = init()
     cookies_str: str = cookies_str_result if cookies_str_result is not None else ""
@@ -238,7 +269,8 @@ if __name__ == '__main__':
                 params['note_time'],
                 params['note_range'],
                 params['pos_distance'],
-                geo=None
+                geo=None,
+                resume=args.resume
             )
             success_count += 1
             logger.info(f'✓ Completed: {query}')

@@ -2,10 +2,12 @@ import json
 import os
 import re
 import time
+from datetime import datetime
 import openpyxl
 import requests
 from loguru import logger
 from retry import retry
+from xhs_utils.path_util import build_note_path
 
 
 def norm_str(str):
@@ -294,31 +296,45 @@ def save_note_detail(note, path):
 
 @retry(tries=3, delay=1)
 def download_note(note_info, path, save_choice, keyword=None):
-    note_id = note_info['note_id']
-    user_id = note_info['user_id']
-    title = note_info['title']
-    title = norm_str(title)[:40]
-    nickname = note_info['nickname']
-    nickname = norm_str(nickname)[:20]
-    if title.strip() == '':
-        title = f'无标题'
-    # 如果提供了关键词，添加关键词层级
-    if keyword:
-        keyword_safe = norm_str(keyword)[:50]
-        save_path = f'{path}/{keyword_safe}/{nickname}_{user_id}/{title}_{note_id}'
-    else:
-        save_path = f'{path}/{nickname}_{user_id}/{title}_{note_id}'
+    # 使用 path_util 构建保存路径
+    save_path = build_note_path(note_info, path, keyword)
     check_and_create_path(save_path)
-    with open(f'{save_path}/info.json', mode='w', encoding='utf-8') as f:
-        f.write(json.dumps(note_info) + '\n')
+    
     note_type = note_info['note_type']
     save_note_detail(note_info, save_path)
+    
+    # 跟踪下载的媒体文件和下载状态
+    downloaded_files = []
+    all_downloads_successful = True
+    
     if note_type == '图集' and save_choice in ['media', 'media-image', 'all']:
         for img_index, img_url in enumerate(note_info['image_list']):
-            download_media(save_path, f'image_{img_index}', img_url, 'image')
+            try:
+                download_media(save_path, f'image_{img_index}', img_url, 'image')
+                downloaded_files.append(f'image_{img_index}.jpg')
+            except Exception:
+                all_downloads_successful = False
     elif note_type == '视频' and save_choice in ['media', 'media-video', 'all']:
-        download_media(save_path, 'cover', note_info['video_cover'], 'image')
-        download_media(save_path, 'video', note_info['video_addr'], 'video')
+        try:
+            download_media(save_path, 'cover', note_info['video_cover'], 'image')
+            downloaded_files.append('cover.jpg')
+        except Exception:
+            all_downloads_successful = False
+        try:
+            download_media(save_path, 'video', note_info['video_addr'], 'video')
+            downloaded_files.append('video.mp4')
+        except Exception:
+            all_downloads_successful = False
+    
+    # 准备增强的info数据，添加下载完成标记
+    enhanced_info = note_info.copy()
+    enhanced_info['download_completed'] = all_downloads_successful
+    enhanced_info['media_files'] = downloaded_files
+    enhanced_info['downloaded_at'] = datetime.now().isoformat()
+    
+    with open(f'{save_path}/info.json', mode='w', encoding='utf-8') as f:
+        f.write(json.dumps(enhanced_info, ensure_ascii=False) + '\n')
+    
     return save_path
 
 
