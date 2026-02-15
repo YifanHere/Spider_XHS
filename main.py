@@ -122,12 +122,12 @@ class Data_Spider:
                 consecutive_success += 1
             # Add delay between notes (not after last one)
             if idx < len(notes) - 1:
-                delay = random.uniform(8.0, 15.0)
+                delay = random.uniform(4.0, 11.0)
                 logger.debug(f"笔记处理间隔延迟: {delay:.1f} 秒")
                 time.sleep(delay)
                 # Smart cooling: long pause every 10 successful requests
                 if consecutive_success >= 10:
-                    cooling_delay = random.uniform(30.0, 60.0)
+                    cooling_delay = random.uniform(20.0, 40.0)
                     logger.info(f"连续获取10个笔记，冷却 {cooling_delay:.1f} 秒...")
                     time.sleep(cooling_delay)
                     consecutive_success = 0
