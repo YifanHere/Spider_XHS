@@ -142,10 +142,10 @@ globalThis.XMLHttpRequest = function (tagName) {
     console.log(`特殊检测: XMLHttpRequest 被调用 (对象: ${tagName})`);
 
 }
-globalThis.Ιnfinity = function (tagName){
+globalThis["\u0399nfinity"] = function (tagName){
     console.log(`特殊检测: Infinity 被调用 (对象: ${tagName})`);
 }
-globalThis.Ιnk = function (tagName){
+globalThis["\u0399nk"] = function (tagName){
     console.log(`特殊检测: Ιnk 被调用 (对象: ${tagName})`);
 }
 globalThis.DeviceOrientationEvent = function (tagName){
