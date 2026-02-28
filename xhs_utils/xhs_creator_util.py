@@ -1,10 +1,11 @@
 import json
 
 import execjs
+from xhs_utils.xhs_util import splice_str
 
 try:
     js = execjs.compile(open(r'../static/xhs_creator_xs.js', 'r', encoding='utf-8').read())
-except:
+except Exception:
     js = execjs.compile(open(r'static/xhs_creator_xs.js', 'r', encoding='utf-8').read())
 
 
@@ -37,12 +38,3 @@ def get_common_headers():
         "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
         "priority": "u=1, i"
     }
-
-
-def splice_str(api, params):
-    url = api + '?'
-    for key, value in params.items():
-        if value is None:
-            value = ''
-        url += key + '=' + value + '&'
-    return url[:-1]

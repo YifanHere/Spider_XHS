@@ -36,3 +36,4 @@ datas/
 .sisyphus/
 
 config/keywords.json
+.vscode/settings.json
