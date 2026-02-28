@@ -209,7 +209,7 @@ def get_html_text(url):
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
     }
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, verify=False, timeout=(10, 30))
     r.raise_for_status()
     r.encoding = r.apparent_encoding
     return r.text
@@ -239,7 +239,7 @@ def download_media(url, path, proxies=None):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         }
-        response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+        response = requests.get(url, headers=headers, proxies=proxies, timeout=30, verify=False)
         response.raise_for_status()
         with open(path, 'wb') as f:
             f.write(response.content)
