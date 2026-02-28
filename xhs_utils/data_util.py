@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 from loguru import logger
 from retry import retry
+from xhs_utils.path_util import norm_str
 
 
 def timestamp_to_str(timestamp):
@@ -45,7 +46,7 @@ def handle_note_info(data):
             image_list.append(image['info_list'][1]['url'])
             # success, msg, img_url = XHS_Apis.get_note_no_water_img(image['info_list'][1]['url'])
             # image_list.append(img_url)
-        except:
+        except Exception:
             pass
     if note_type == '视频':
         video_cover = image_list[0] if image_list else None
@@ -101,7 +102,7 @@ def handle_note_info(data):
     for tag in tags_temp:
         try:
             tags.append(tag['name'])
-        except:
+        except Exception:
             pass
     upload_time = timestamp_to_str(data['note_card']['time'])
     if 'ip_location' in data['note_card']:
@@ -144,7 +145,7 @@ def handle_comment_info(data):
     upload_time = timestamp_to_str(data['create_time'])
     try:
         ip_location = data['ip_location']
-    except:
+    except Exception:
         ip_location = '未知'
     pictures = []
     try:
@@ -154,9 +155,9 @@ def handle_comment_info(data):
                 pictures.append(picture['info_list'][1]['url'])
                 # success, msg, img_url = XHS_Apis.get_note_no_water_img(picture['info_list'][1]['url'])
                 # pictures.append(img_url)
-            except:
+            except Exception:
                 pass
-    except:
+    except Exception:
         pass
     return {
         'note_id': note_id,
@@ -189,7 +190,7 @@ def handle_user_info(data):
     for tag in tags_temp:
         try:
             tags.append(tag['name'])
-        except:
+        except Exception:
             pass
     return {
         'user_id': user_id,
@@ -212,21 +213,6 @@ def get_html_text(url):
     r.raise_for_status()
     r.encoding = r.apparent_encoding
     return r.text
-
-
-def norm_str(s):
-    if not s:
-        return ''
-    # 去除前后空格
-    s = s.strip()
-    # 替换Windows文件名非法字符
-    s = s.replace('\\', '_').replace('/', '_').replace(':', '_').replace('*', '_').replace('?', '_').replace('"', '_').replace('<', '_').replace('>', '_').replace('|', '_')
-    # 替换换行符和制表符
-    s = s.replace('\n', '_').replace('\r', '_').replace('\t', '_')
-    # 去除前后空格
-    s = s.strip()
-    # 限制长度，避免文件名过长
-    return s[:80]
 
 
 def get_data_excel(path, data_list):
@@ -334,3 +320,7 @@ def batch_download_notes(note_info_list, save_dir, max_workers=3, download_media
                 future.result()
             except Exception as e:
                 logger.error(f'批量下载失败: {e}')
+
+
+# Alias for backward compatibility
+save_to_xlsx = get_data_excel
