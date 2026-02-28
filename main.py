@@ -62,7 +62,7 @@ class Data_Spider:
 
             # 现在可以安全访问 items[0]
             note_data = items[0]
-            note_data['url'] = note_url
+            note_data.setdefault('note_card', {})['note_url'] = note_url
             note_info = handle_note_info(note_data)
 
         except KeyError as e:
