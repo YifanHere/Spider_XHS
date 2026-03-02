@@ -134,6 +134,8 @@ python main.py
 如果你对爬虫和ai agent感兴趣，请加作者主页wx通过邀请加入群聊
 
 ps: 群聊已超过wx限制人数，只能通过邀请加入群聊，主页有wx
-<img width="1000" height="1450" alt="5355a0f82398ee2052f2e659328d737b" src="./author/group.jpg" />
+
+<img width="411" height="612" alt="image" src="https://github.com/user-attachments/assets/ad6f133a-e6d1-4d53-bbd2-2b1a9c88cedf" />
+
 
 
