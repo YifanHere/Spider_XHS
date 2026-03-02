@@ -31,6 +31,10 @@ def handle_note_info(data):
     note_url = data['note_card']['note_url']
     note_type = data['note_card']['type']
     user_id = data['note_card']['user']['user_id']
+    
+    # 诊断日志：记录笔记类型
+    logger.info(f'处理笔记 {note_id}, 类型: {note_type}')
+    
     home_url = f'https://www.xiaohongshu.com/user/profile/{user_id}'
     nickname = data['note_card']['user']['nickname']
     avatar = data['note_card']['user']['avatar']
@@ -44,13 +48,19 @@ def handle_note_info(data):
     for image in data['note_card']['image_list']:
         try:
             image_list.append(image['info_list'][1]['url'])
-            # success, msg, img_url = XHS_Apis.get_note_no_water_img(image['info_list'][1]['url'])
-            # image_list.append(img_url)
         except Exception:
             pass
-    if note_type == '视频':
+    
+    # 视频处理逻辑 - 支持多种可能的类型标识
+    video_cover = None
+    video_addr = None
+    
+    # 检查是否为视频类型（支持多种可能的值）
+    is_video = note_type in ['视频', 'video', 'Video', 'VIDEO']
+    
+    if is_video:
         video_cover = image_list[0] if image_list else None
-        video_addr = None
+        logger.info(f'笔记 {note_id} 识别为视频类型，开始获取视频地址...')
         
         try:
             # 方法1：从API数据中获取视频地址（多编码支持）
@@ -67,7 +77,7 @@ def handle_note_info(data):
                         logger.info(f"成功获取视频地址({codec}): {video_addr}")
                         break
             
-            # 方法1.5：使用 origin_video_key 备选（上游优点）
+            # 方法1.5：使用 origin_video_key 备选
             if not video_addr:
                 video_info = data.get('note_card', {}).get('video', {})
                 if 'consumer' in video_info:
@@ -75,6 +85,34 @@ def handle_note_info(data):
                     if origin_key:
                         video_addr = f"https://sns-video-bd.xhscdn.com/{origin_key}"
                         logger.info(f"方法1.5使用origin_video_key获取视频地址: {video_addr}")
+            
+            # 方法1.6：尝试从 video_url 字段获取
+            if not video_addr:
+                video_url = data['note_card'].get('video', {}).get('url', '')
+                if video_url:
+                    video_addr = video_url
+                    logger.info(f"方法1.6从video_url字段获取视频地址: {video_addr}")
+            
+            # 方法1.7：尝试从 consumer.url 获取
+            if not video_addr:
+                consumer_url = data['note_card'].get('video', {}).get('consumer', {}).get('url', '')
+                if consumer_url:
+                    video_addr = consumer_url
+                    logger.info(f"方法1.7从consumer.url获取视频地址: {video_addr}")
+            
+            # 方法1.8：尝试从 media.stream 的其他格式获取
+            if not video_addr and 'stream' in video_data:
+                for codec_key, codec_list in video_data['stream'].items():
+                    if isinstance(codec_list, list) and len(codec_list) > 0:
+                        for item in codec_list:
+                            if isinstance(item, dict):
+                                url = item.get('master_url') or item.get('url')
+                                if url:
+                                    video_addr = url
+                                    logger.info(f"方法1.8从stream.{codec_key}获取视频地址: {video_addr}")
+                                    break
+                    if video_addr:
+                        break
             
             # 方法2：如果所有格式都失败，抛出异常进入方法2
             if not video_addr:
@@ -94,9 +132,13 @@ def handle_note_info(data):
             except Exception as e2:
                 logger.error(f"方法2执行异常: {e2}")
                 video_addr = None
-    else:
-        video_cover = None
-        video_addr = None
+        
+        # 最终检查：如果仍然没有视频地址，记录详细信息
+        if not video_addr:
+            logger.error(f"无法获取视频地址，note_id: {note_id}。视频数据结构片段: {json.dumps(data.get('note_card', {}).get('video', {}), ensure_ascii=False, indent=2)[:500]}")
+        else:
+            logger.info(f"笔记 {note_id} 视频地址获取成功: {video_addr[:80]}...")
+    
     tags_temp = data['note_card']['tag_list']
     tags = []
     for tag in tags_temp:
@@ -153,8 +195,6 @@ def handle_comment_info(data):
         for picture in pictures_temp:
             try:
                 pictures.append(picture['info_list'][1]['url'])
-                # success, msg, img_url = XHS_Apis.get_note_no_water_img(picture['info_list'][1]['url'])
-                # pictures.append(img_url)
             except Exception:
                 pass
     except Exception:
@@ -289,12 +329,22 @@ def download_note(note_info, save_dir, download_media_files=True, proxies=None):
     
     # 下载视频
     video_addr = note_info.get('video_addr')
-    if video_addr:
-        try:
-            video_path = os.path.join(note_dir, 'video.mp4')
-            download_media(video_addr, video_path, proxies)
-        except Exception as e:
-            logger.error(f'下载视频失败: {e}')
+    video_type = note_info.get('note_type', '')
+    
+    # 支持多种视频类型标识
+    is_video = video_type in ['视频', 'video', 'Video', 'VIDEO']
+    
+    if is_video:
+        if video_addr:
+            try:
+                video_path = os.path.join(note_dir, 'video.mp4')
+                logger.info(f'开始下载视频: {video_addr[:80]}...')
+                download_media(video_addr, video_path, proxies)
+                logger.info(f'视频下载完成: {video_path}')
+            except Exception as e:
+                logger.error(f'下载视频失败: {e}, video_addr: {video_addr[:80]}...')
+        else:
+            logger.warning(f'笔记 {note_id} 标记为视频类型，但未找到视频地址。请检查info.json中的video_addr字段。')
     
     logger.info(f'笔记下载完成: {note_dir}')
     return note_dir
