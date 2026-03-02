@@ -136,33 +136,3 @@ python postprocess_audio.py --action delete
 | 25/03/18 | - 更新API，修复部分问题                            |
 | 25/06/07 | - 更新search接口，区分视频和图集下载，增加小红书创作者api        |
 | 25/07/15 | - 更新 xs version56 & 小红书创作者接口              |
-
-
-## 🧸额外说明
-1. 感谢star⭐和follow📰！不时更新
-2. 作者的联系方式在主页里，有问题可以随时联系我
-3. 可以关注下作者的其他项目，欢迎 PR 和 issue
-4. 感谢赞助！如果此项目对您有帮助，请作者喝一杯奶茶~~ （开心一整天😊😊）
-5. thank you~~~
-
-<div align="center">
-  <img src="./author/wx_pay.png" width="400px" alt="微信赞赏码"> 
-  <img src="./author/zfb_pay.jpg" width="400px" alt="支付宝收款码">
-</div>
-
-
-## 📈 Star 趋势
-<a href="https://www.star-history.com/#cv-cat/Spider_XHS&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cv-cat/Spider_XHS&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cv-cat/Spider_XHS&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=cv-cat/Spider_XHS&type=Date" />
- </picture>
-</a>
-
-## 🍔 交流群
-过期请加作者主页wx
-update: 群聊已超过wx限制人数，只能通过邀请加入群聊，主页有wx
-<img width="1000" height="1450" alt="5355a0f82398ee2052f2e659328d737b" src="./author/group.jpg" />
-
-
