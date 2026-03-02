@@ -122,7 +122,7 @@ class Data_Spider:
                 consecutive_success += 1
             # Add delay between notes (not after last one)
             if idx < len(notes) - 1:
-                delay = random.uniform(4.0, 8.0)
+                delay = random.uniform(2.0, 4.0)
                 logger.debug(f"笔记处理间隔延迟: {delay:.1f} 秒")
                 time.sleep(delay)
                 # Smart cooling: long pause every 10 successful requests
@@ -136,10 +136,20 @@ class Data_Spider:
             logger.info(f"断点续传统计: 跳过 {skipped_count} 个已下载笔记，处理 {len(note_list) - skipped_count} 个新笔记")
         for note_info in note_list:
             if save_choice in ('all', 'media', 'media-video', 'media-image'):
-                download_note(note_info, base_path['media'], save_choice, keyword=keyword)
+                # Convert save_choice to boolean for download_media_files parameter
+                if save_choice == 'media-video':
+                    # Only download if it's a video note
+                    should_download = note_info.get('note_type') == '视频'
+                elif save_choice == 'media-image':
+                    # Only download if it's an image note
+                    should_download = note_info.get('note_type') != '视频'
+                else:
+                    # 'all' or 'media' - download all media
+                    should_download = True
+                download_note(note_info, base_path['media'], should_download)
         if save_choice in ('all', 'excel'):
             file_path = os.path.abspath(os.path.join(base_path['excel'], f'{excel_name}.xlsx'))
-            save_to_xlsx(note_list, file_path)
+            save_to_xlsx(file_path, note_list)
 
 
     def spider_user_all_note(self, user_url: str, cookies_str: str, base_path: dict[str, str], save_choice: str, excel_name: str = '', proxies: dict | None = None) -> tuple[list[str], bool, str]:
